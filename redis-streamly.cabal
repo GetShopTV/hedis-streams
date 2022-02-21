@@ -1,0 +1,32 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.5.
+--
+-- see: https://github.com/sol/hpack
+
+name:           redis-streamly
+version:        0.1.0.0
+author:         Diamondy4
+maintainer:     Diamondy4@hotmail.com
+license:        UnspecifiedLicense
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Database.Redis.Streams.Streamly
+  other-modules:
+      Paths_redis_streamly
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      FlexibleContexts
+      FlexibleInstances
+  build-depends:
+      base >=4.14 && <=5
+    , bytestring
+    , hedis
+    , streamly
+  default-language: Haskell2010
