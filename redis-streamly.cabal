@@ -15,6 +15,7 @@ extra-source-files:
 
 library
   exposed-modules:
+      Database.Redis.Streams
       Database.Redis.Streams.Streamly
   other-modules:
       Paths_redis_streamly
