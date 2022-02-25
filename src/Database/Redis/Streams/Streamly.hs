@@ -11,6 +11,8 @@ import qualified Data.ByteString.Char8         as Ch8
 import           Database.Redis
 import qualified Database.Redis                as Redis
 
+import           Control.Monad
+import           Database.Redis.Streams
 import qualified Streamly.Data.Fold            as Fold
 import           Streamly.Data.Fold             ( Fold )
 import qualified Streamly.Data.Unfold          as Unfold
@@ -19,12 +21,13 @@ import qualified Streamly.Prelude              as Stream
 import           Streamly.Prelude               ( IsStream )
 
 
-read :: IsStream t => String -> t Redis (ByteString, ByteString)
-read streamId = readStartingFrom streamId "$"
+readStream :: IsStream t => String -> t Redis (ByteString, ByteString)
+readStream streamId = readStreamStartingFrom streamId "$"
 
-readStartingFrom
+readStreamStartingFrom
     :: IsStream t => String -> ByteString -> t Redis (ByteString, ByteString)
-readStartingFrom streamId = Stream.unfold $ readStartingFromUnfold streamId
+readStreamStartingFrom streamId =
+    Stream.unfold $ readStartingFromUnfold streamId
 
 readStartingFromUnfold
     :: String -> Unfold Redis ByteString (ByteString, ByteString)
@@ -49,15 +52,11 @@ readStartingFromUnfold streamIn = Unfold.many
             Right Nothing -> pure $ Just ([], oldRecordId)
             err           -> error $ "Unexpected redis error: " <> show err
 
-send :: String -> Stream.SerialT Redis (ByteString, ByteString) -> Redis ()
-send streamOut = Stream.fold (sendFold streamOut)
+sendStream
+    :: String -> Stream.SerialT Redis (ByteString, ByteString) -> Redis ()
+sendStream streamOut = Stream.fold (sendFold streamOut)
 
 sendFold :: String -> Fold Redis (ByteString, ByteString) ()
 sendFold streamOut = Fold.foldlM' (const step) (pure ())
-  where
-    step (key, value) = do
-        result <- Redis.xadd (Ch8.pack streamOut) "*" [(key, value)]
-        case result of
-            Right _ -> return ()
-            err     -> error $ "Unexpected redis error: " <> show err
+    where step (key, value) = void $ sendUpstream streamOut key value
 
