@@ -2,8 +2,15 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TupleSections #-}
 
-module Database.Redis.Streams.Streamly where
+module Database.Redis.Streams.Streamly
+    ( readStream
+    , readStreamStartingFrom
+    , readStartingFromUnfold
+    , sendStream
+    , sendFold
+    ) where
 
 import           Data.ByteString                ( ByteString )
 import qualified Data.ByteString.Char8         as Ch8
@@ -20,17 +27,19 @@ import           Streamly.Data.Unfold           ( Unfold )
 import qualified Streamly.Prelude              as Stream
 import           Streamly.Prelude               ( IsStream )
 
+type MsgID = ByteString
+type Key = ByteString
+type Value = ByteString
 
-readStream :: IsStream t => String -> t Redis (ByteString, ByteString)
+readStream :: IsStream t => String -> t Redis (MsgID, (Key, Value))
 readStream streamId = readStreamStartingFrom streamId "$"
 
 readStreamStartingFrom
-    :: IsStream t => String -> ByteString -> t Redis (ByteString, ByteString)
+    :: IsStream t => String -> MsgID -> t Redis (MsgID, (Key, Value))
 readStreamStartingFrom streamId =
     Stream.unfold $ readStartingFromUnfold streamId
 
-readStartingFromUnfold
-    :: String -> Unfold Redis ByteString (ByteString, ByteString)
+readStartingFromUnfold :: String -> Unfold Redis MsgID (MsgID, (Key, Value))
 readStartingFromUnfold streamIn = Unfold.many
     (Unfold.unfoldrM $ getResponseStep streamIn)
     Unfold.fromList
@@ -47,16 +56,15 @@ readStartingFromUnfold streamIn = Unfold.many
                             | xResponse <- xResponses
                             ]  -- , stream xResponse == Ch8.pack streamIn
                     lastRecordId = recordId . Prelude.last $ records
-                    pairs        = Prelude.concatMap Redis.keyValues records
-                pure $ Just (pairs, lastRecordId)
+                    pairs        = Redis.keyValues =<< records
+                pure $ Just ((lastRecordId, ) <$> pairs, lastRecordId)
             Right Nothing -> pure $ Just ([], oldRecordId)
             err           -> error $ "Unexpected redis error: " <> show err
 
-sendStream
-    :: String -> Stream.SerialT Redis (ByteString, ByteString) -> Redis ()
+sendStream :: String -> Stream.SerialT Redis (Key, Value) -> Redis ()
 sendStream streamOut = Stream.fold (sendFold streamOut)
 
-sendFold :: String -> Fold Redis (ByteString, ByteString) ()
+sendFold :: String -> Fold Redis (Key, Value) ()
 sendFold streamOut = Fold.foldlM' (const step) (pure ())
     where step (key, value) = void $ sendUpstream streamOut key value
 
