@@ -11,6 +11,9 @@ dependencies:
   - hedis
   - streamly
   - bytestring
+  - monad-control
+  - exceptions
+  - transformers-base
 default-extensions:
   - OverloadedStrings
   - FlexibleContexts
