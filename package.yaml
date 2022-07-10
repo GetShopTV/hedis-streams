@@ -1,23 +1,54 @@
-name: redis-streamly
-version: "0.1.0.0"
+name: hedis-streams
+version: "0.2.0.0"
 author: Diamondy4
 maintainer: Diamondy4@hotmail.com
-license: UnspecifiedLicense
+#license: UnspecifiedLicense
 
 extra-source-files:
   - CHANGELOG.md
 dependencies:
   - base >= 4.14 && <= 5
   - hedis
-  - streamly
   - bytestring
-  - monad-control
-  - exceptions
-  - transformers-base
+  - optics-core
 default-extensions:
   - OverloadedStrings
+  - OverloadedLabels
+  - TypeApplications
+  - DataKinds
   - FlexibleContexts
   - FlexibleInstances
-
-library:
-  source-dirs: src
+  - DeriveGeneric
+  - DuplicateRecordFields
+  - LambdaCase
+  - DeriveAnyClass
+  - DerivingStrategies
+  - NamedFieldPuns
+  - RecordWildCards
+  - ImportQualifiedPost
+internal-libraries:
+  hedis-streams-core:
+    exposed: true
+    visibility: public
+    source-dirs: lib/hedis-streams-core
+    dependencies:
+      - mtl
+  hedis-streams-streamly:
+    exposed: true
+    visibility: public
+    source-dirs: lib/hedis-streams-streamly
+    dependencies:
+      - hedis-streams-core
+      - streamly
+      - monad-control
+      - exceptions
+      - transformers-base
+  hedis-streams-streamly-store:
+    exposed: true
+    visibility: public
+    source-dirs: lib/hedis-streams-streamly-store
+    dependencies:
+      - hedis-streams-core
+      - hedis-streams-streamly
+      - streamly
+      - store
