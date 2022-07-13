@@ -14,23 +14,16 @@ import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude (IsStream)
 import Streamly.Prelude qualified as Streamly
 
-type EndCondition = IO Bool
-
 fromStreamAsConsumer ::
-    IsStream t => Consumer -> XReadOpts -> Maybe EndCondition -> t Redis StreamsRecord
-fromStreamAsConsumer consumer opts endCondition = Streamly.unfold (fromStreamAsConsumerUnfold consumer opts endCondition) ()
+    IsStream t => Consumer -> XReadOpts -> t Redis StreamsRecord
+fromStreamAsConsumer consumer opts = Streamly.unfold (fromStreamAsConsumerUnfold consumer opts) ()
 
-fromStreamAsConsumerUnfold :: Consumer -> XReadOpts -> Maybe EndCondition -> Unfold Redis () StreamsRecord
-fromStreamAsConsumerUnfold consumer opts endCondition =
+fromStreamAsConsumerUnfold :: Consumer -> XReadOpts -> Unfold Redis () StreamsRecord
+fromStreamAsConsumerUnfold consumer opts =
     Unfold.many
-        (Unfold.unfoldrM (const readStreamAsConsumerMaybeEnd))
+        (Unfold.unfoldrM (const readStreamAsConsumerProducer))
         Unfold.fromList
   where
-    readStreamAsConsumerMaybeEnd = case endCondition of
-        Nothing -> readStreamAsConsumerProducer
-        Just checkStopStream -> do
-            stopStream <- liftIO checkStopStream
-            if stopStream then pure Nothing else readStreamAsConsumerProducer
     readStreamAsConsumerProducer =
         readStreamAsConsumer consumer opts >>= \case
             Left err -> throwM err -- Possible only when redis sends error message back

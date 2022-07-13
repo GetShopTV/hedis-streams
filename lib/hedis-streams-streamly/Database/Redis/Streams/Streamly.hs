@@ -19,26 +19,19 @@ import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude (IsStream)
 import Streamly.Prelude qualified as Streamly
 
-type EndCondition = IO Bool
-
-fromStream :: IsStream t => StreamKey -> XReadOpts -> Maybe EndCondition -> t Redis StreamsRecord
-fromStream key opts endCondition = fromStreamStartingFrom key opts endCondition newestMessageID
+fromStream :: IsStream t => StreamKey -> XReadOpts -> t Redis StreamsRecord
+fromStream key opts = fromStreamStartingFrom key opts newestMessageID
 
 fromStreamStartingFrom ::
-    IsStream t => StreamKey -> XReadOpts -> Maybe EndCondition -> MessageID -> t Redis StreamsRecord
-fromStreamStartingFrom key opts endCondition = Streamly.unfold (fromStreamUnfold key opts endCondition)
+    IsStream t => StreamKey -> XReadOpts -> MessageID -> t Redis StreamsRecord
+fromStreamStartingFrom key opts = Streamly.unfold (fromStreamUnfold key opts)
 
-fromStreamUnfold :: StreamKey -> XReadOpts -> Maybe EndCondition -> Unfold Redis MessageID StreamsRecord
-fromStreamUnfold key opts endCondition =
+fromStreamUnfold :: StreamKey -> XReadOpts -> Unfold Redis MessageID StreamsRecord
+fromStreamUnfold key opts =
     Unfold.many
-        (Unfold.unfoldrM readStreamMaybeEnd)
+        (Unfold.unfoldrM readStreamProducer)
         Unfold.fromList
   where
-    readStreamMaybeEnd = case endCondition of
-        Nothing -> readStreamProducer
-        Just checkStopStream -> \lstMsgId -> do
-            stopStream <- liftIO checkStopStream
-            if stopStream then pure Nothing else readStreamProducer lstMsgId
     readStreamProducer lstMsgId =
         readStream key lstMsgId opts >>= \case
             Left err -> throwM err -- Possible only when redis sends error message back

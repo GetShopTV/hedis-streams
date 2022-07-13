@@ -16,19 +16,17 @@ fromStream ::
     (IsStream t, Store a) =>
     StreamKey ->
     Redis.XReadOpts ->
-    Maybe SRedis.EndCondition ->
     t Redis (MessageID, Either PeekException a)
-fromStream key opts endCondition = fromStreamStartingFrom key opts endCondition newestMessageID
+fromStream key opts = fromStreamStartingFrom key opts newestMessageID
 
 fromStreamStartingFrom ::
     (IsStream t, Store a) =>
     StreamKey ->
     Redis.XReadOpts ->
-    Maybe SRedis.EndCondition ->
     MessageID ->
     t Redis (MessageID, Either PeekException a)
-fromStreamStartingFrom key opts endCondition startMsgId =
-    SRedis.fromStreamStartingFrom key opts endCondition startMsgId
+fromStreamStartingFrom key opts startMsgId =
+    SRedis.fromStreamStartingFrom key opts startMsgId
         & Streamly.unfoldMany deserializedStreamsRecordUnfold
 
 sendStream ::

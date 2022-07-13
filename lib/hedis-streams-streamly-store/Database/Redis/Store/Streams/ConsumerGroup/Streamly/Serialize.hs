@@ -4,7 +4,6 @@ import Data.Function
 import Data.Store
 import Database.Redis
 import Database.Redis.Store.Streams.Common
-import Database.Redis.Streams.ConsumerGroup.Streamly (EndCondition)
 import Database.Redis.Streams.ConsumerGroup.Streamly qualified as SRedisConsumerGroup
 import Database.Redis.Streams.SpecialMessageID (autoclaimNewScanMessageID)
 import Database.Redis.Streams.Types
@@ -17,10 +16,9 @@ fromStreamAsConsumer ::
     (IsStream t, Store a) =>
     Consumer ->
     XReadOpts ->
-    Maybe EndCondition ->
     t Redis (MessageID, Either PeekException a)
-fromStreamAsConsumer consumer opts endCondition =
-    SRedisConsumerGroup.fromStreamAsConsumer consumer opts endCondition
+fromStreamAsConsumer consumer opts =
+    SRedisConsumerGroup.fromStreamAsConsumer consumer opts
         & Streamly.unfoldMany deserializedStreamsRecordUnfold
 
 fromPendingMessages ::
