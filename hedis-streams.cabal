@@ -98,10 +98,11 @@ library hedis-streams-streamly-store
   exposed: True
   visibility: public
   exposed-modules:
-      Database.Redis.Store.Streams.Common
-      Database.Redis.Store.Streams.ConsumerGroup.Streamly.Serialize
-      Database.Redis.Store.Streams.Stream.Serialize
-      Database.Redis.Store.Streams.Streamly.Serialize
+      Database.Redis.Streams.Common
+      Database.Redis.Streams.ConsumerGroup.Serialize
+      Database.Redis.Streams.ConsumerGroup.Streamly.Serialize
+      Database.Redis.Streams.Stream.Serialize
+      Database.Redis.Streams.Streamly.Serialize
   other-modules:
       Paths_hedis_streams
   autogen-modules:
@@ -126,10 +127,12 @@ library hedis-streams-streamly-store
   build-depends:
       base >=4.14 && <=5
     , bytestring
+    , hashable
     , hedis
     , hedis-streams-core
     , hedis-streams-streamly
     , optics-core
     , store
     , streamly
+    , winery
   default-language: Haskell2010

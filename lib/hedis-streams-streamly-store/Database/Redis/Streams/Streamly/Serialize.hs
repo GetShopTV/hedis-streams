@@ -1,10 +1,10 @@
-module Database.Redis.Store.Streams.Streamly.Serialize where
+module Database.Redis.Streams.Streamly.Serialize where
 
 import Data.Function
 import Data.Store
 import Database.Redis (Redis, StreamsRecord (..))
 import Database.Redis qualified as Redis
-import Database.Redis.Store.Streams.Common
+import Database.Redis.Streams.Common
 import Database.Redis.Streams.SpecialMessageID
 import Database.Redis.Streams.Streamly qualified as SRedis
 import Database.Redis.Streams.Types

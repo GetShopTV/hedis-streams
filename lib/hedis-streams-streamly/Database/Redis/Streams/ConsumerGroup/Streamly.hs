@@ -6,9 +6,7 @@ import Database.Redis
 import Database.Redis.Internal.Instances ()
 import Database.Redis.Streams.ConsumerGroup
 import Database.Redis.Streams.SpecialMessageID (autoclaimNewScanMessageID)
-import Database.Redis.Streams.Types.ConsumerGroup
-import Database.Redis.Streams.Types.Extras
-import Database.Redis.Streams.Types.Stream
+import Database.Redis.Streams.Types
 import Streamly.Data.Unfold (Unfold)
 import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude (IsStream)

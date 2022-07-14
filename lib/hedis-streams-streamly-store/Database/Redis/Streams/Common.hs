@@ -1,6 +1,10 @@
-module Database.Redis.Store.Streams.Common where
+module Database.Redis.Streams.Common where
 
+import Codec.Winery qualified as Winery
+import Data.ByteString.Builder qualified as BSB
+import Data.ByteString.Lazy qualified as BSL
 import Data.Store
+import Data.Typeable
 import Database.Redis hiding (decode)
 import Database.Redis.Streams.Types
 import Streamly.Data.Unfold qualified as Unfold
@@ -12,6 +16,16 @@ storeStreamEntryField = EntryField "dstore"
 
 toStoreEntry :: Store a => a -> Entry
 toStoreEntry x = Entry [(storeStreamEntryField, EntryValue $ encode x)]
+
+storeStreamConsumerGroupName :: ConsumerGroupName
+storeStreamConsumerGroupName = ConsumerGroupName "dstore_default_cg"
+
+-- | Create stream key from type name and schema representation.
+streamKeyFromData :: (Winery.Serialise a) => proxy a -> StreamKey
+streamKeyFromData proxy = StreamKey . BSL.toStrict . BSB.toLazyByteString $ typeName <> BSB.charUtf8 '_' <> schema
+  where
+    typeName = BSB.stringUtf8 . show . typeRep $ proxy
+    schema = BSB.byteString $ Winery.serialiseSchema . Winery.schema $ proxy
 
 deserializedStreamsRecordUnfold ::
     Store a => Unfold.Unfold Redis StreamsRecord (MessageID, Either PeekException a)

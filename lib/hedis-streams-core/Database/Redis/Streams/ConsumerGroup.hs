@@ -11,11 +11,9 @@ import Data.ByteString.Char8 qualified as BS8
 import Data.Coerce
 import Database.Redis (MonadRedis, Redis, RedisCtx, Reply (..), Status, StreamsRecord, TxResult (..), XReadOpts)
 import Database.Redis qualified as Redis
-import Database.Redis.Streams.Extras qualified as Internal
+import Database.Redis.Streams.Extras qualified as RedisEx
 import Database.Redis.Streams.SpecialMessageID
 import Database.Redis.Streams.Types
-import Database.Redis.Streams.Types.Error
-import Database.Redis.Streams.Types.Extras
 import Optics.Core
 import Optics.Generic ()
 
@@ -100,7 +98,7 @@ readStreamAsConsumer consumer readOpts = do
 readPendingMessages :: Consumer -> MessageID -> XAutoclaimOpts -> Redis (Either RedisStreamSomeError (Maybe MessageID, [StreamsRecord]))
 readPendingMessages consumer lstMsgId autoclaimOpts = do
     res <-
-        Internal.xautoclaimOpts
+        RedisEx.xautoclaimOpts
             (consumer ^. #group % #streamKey & coerce)
             (consumer ^. #group % #name & coerce)
             (consumer ^. #name & coerce)

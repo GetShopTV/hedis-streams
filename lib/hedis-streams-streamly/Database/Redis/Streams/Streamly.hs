@@ -8,7 +8,7 @@ import Database.Redis qualified as Redis
 
 import Database.Redis.Internal.Instances ()
 import Database.Redis.Streams.Stream
-import Database.Redis.Streams.Types.Stream
+import Database.Redis.Streams.Types
 
 import Control.Monad.Catch
 import Control.Monad.IO.Class

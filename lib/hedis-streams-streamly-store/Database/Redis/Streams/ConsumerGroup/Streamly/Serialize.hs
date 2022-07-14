@@ -1,13 +1,12 @@
-module Database.Redis.Store.Streams.ConsumerGroup.Streamly.Serialize where
+module Database.Redis.Streams.ConsumerGroup.Streamly.Serialize where
 
 import Data.Function
 import Data.Store
 import Database.Redis
-import Database.Redis.Store.Streams.Common
+import Database.Redis.Streams.Common
 import Database.Redis.Streams.ConsumerGroup.Streamly qualified as SRedisConsumerGroup
-import Database.Redis.Streams.SpecialMessageID (autoclaimNewScanMessageID)
+import Database.Redis.Streams.SpecialMessageID
 import Database.Redis.Streams.Types
-import Database.Redis.Streams.Types.Extras
 import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude (IsStream)
 import Streamly.Prelude qualified as Streamly
