@@ -12,6 +12,9 @@ import GHC.Generics
 sendUpstream ::
     (Store a) =>
     StreamKey ->
+    EntryField ->
     a ->
     Redis (Either RedisStreamSomeError ByteString)
-sendUpstream key x = SRedis.sendUpstream key (toStoreEntry x)
+sendUpstream key field = SRedis.sendUpstream key . toStoreEntry
+  where
+    toStoreEntry = toStoreEntryWithField field

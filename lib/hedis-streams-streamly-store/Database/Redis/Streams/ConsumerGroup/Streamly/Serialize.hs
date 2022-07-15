@@ -15,7 +15,7 @@ fromStreamAsConsumer ::
     (IsStream t, Store a) =>
     Consumer ->
     XReadOpts ->
-    t Redis (MessageID, Either PeekException a)
+    t Redis (MessageID, EntryField, Either PeekException a)
 fromStreamAsConsumer consumer opts =
     SRedisConsumerGroup.fromStreamAsConsumer consumer opts
         & Streamly.unfoldMany deserializedStreamsRecordUnfold
@@ -24,7 +24,7 @@ fromPendingMessages ::
     (IsStream t, Store a) =>
     Consumer ->
     XAutoclaimOpts ->
-    t Redis (MessageID, Either PeekException a)
+    t Redis (MessageID, EntryField, Either PeekException a)
 fromPendingMessages consumer = fromPendingMessagesStartingFrom consumer autoclaimNewScanMessageID
 
 fromPendingMessagesStartingFrom ::
@@ -32,7 +32,7 @@ fromPendingMessagesStartingFrom ::
     Consumer ->
     MessageID ->
     XAutoclaimOpts ->
-    t Redis (MessageID, Either PeekException a)
+    t Redis (MessageID, EntryField, Either PeekException a)
 fromPendingMessagesStartingFrom consumer lstMsgId opts =
     SRedisConsumerGroup.fromPendingMessagesStartingFrom consumer lstMsgId opts
         & Streamly.unfoldMany deserializedStreamsRecordUnfold

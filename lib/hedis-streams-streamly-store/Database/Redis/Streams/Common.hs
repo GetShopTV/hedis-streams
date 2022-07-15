@@ -10,12 +10,14 @@ import Database.Redis.Streams.Types
 import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude qualified as Streamly
 
--- | All redis streams that created by this library use entry field "dstore" to store serialized data.
-storeStreamEntryField :: EntryField
-storeStreamEntryField = EntryField "dstore"
+{- | Placeholder entry field to store serialized data.
+ If possible use your type version as key.
+-}
+storePlaceholderStreamEntryField :: EntryField
+storePlaceholderStreamEntryField = EntryField "noversion"
 
-toStoreEntry :: Store a => a -> Entry
-toStoreEntry x = Entry [(storeStreamEntryField, EntryValue $ encode x)]
+toStoreEntryWithField :: Store a => EntryField -> a -> Entry
+toStoreEntryWithField field x = Entry [(field, EntryValue $ encode x)]
 
 storeStreamConsumerGroupName :: ConsumerGroupName
 storeStreamConsumerGroupName = ConsumerGroupName "dstore_default_cg"
@@ -28,7 +30,7 @@ streamKeyFromData proxy = StreamKey . BSL.toStrict . BSB.toLazyByteString $ type
     schema = BSB.byteString $ Winery.serialiseSchema . Winery.schema $ proxy
 
 deserializedStreamsRecordUnfold ::
-    Store a => Unfold.Unfold Redis StreamsRecord (MessageID, Either PeekException a)
+    Store a => Unfold.Unfold Redis StreamsRecord (MessageID, EntryField, Either PeekException a)
 deserializedStreamsRecordUnfold =
     Unfold.many
         -- Extract stream entries
@@ -36,9 +38,9 @@ deserializedStreamsRecordUnfold =
         -- Pair entry with it's message id, decode the value
         ( Unfold.function
             ( \StreamsRecord{recordId, keyValues} ->
-                -- Key should be "dstore", but not checked for performance
+                -- Key should be "version" of your datatype.
                 -- Allows multiple serialized types in the same message
-                fmap (\(_key, value) -> (MessageID recordId, decode value)) keyValues
+                fmap (\(versionKey, value) -> (MessageID recordId, EntryField versionKey, decode value)) keyValues
             )
         ) -- Flatten
         Unfold.fromList
