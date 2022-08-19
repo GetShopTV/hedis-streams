@@ -15,3 +15,6 @@ newtype ConsumerName = ConsumerName {unConsumerName :: ByteString}
 
 data Consumer = Consumer {name :: ConsumerName, group :: ConsumerGroup}
     deriving (Show, Eq, Generic, Ord)
+
+newtype AutoclaimConsumer = AutoclaimConsumer {getConsumer :: Consumer}
+    deriving (Show, Eq, Generic, Ord)

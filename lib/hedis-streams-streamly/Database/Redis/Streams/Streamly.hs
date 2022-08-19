@@ -1,48 +1,53 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE TypeFamilies #-}
+
 module Database.Redis.Streams.Streamly where
 
-import Data.ByteString (ByteString)
-import Data.ByteString.Char8 qualified as Ch8
-
 import Database.Redis
-import Database.Redis qualified as Redis
 
 import Database.Redis.Internal.Instances ()
 import Database.Redis.Streams.Stream
 import Database.Redis.Streams.Types
 
 import Control.Monad.Catch
-import Control.Monad.IO.Class
 
-import Database.Redis.Streams.SpecialMessageID
-import Streamly.Data.Unfold (Unfold)
-import Streamly.Data.Unfold qualified as Unfold
+import Data.Kind
+import Database.Redis.Internal.Streams.ConsumerGroup.Streamly
+import Database.Redis.Internal.Streams.ConsumerGroup.Streamly qualified as Consumer
+import Database.Redis.Internal.Streams.Streamly
 import Streamly.Prelude (IsStream)
 import Streamly.Prelude qualified as Streamly
 
-fromStream :: IsStream t => StreamKey -> XReadOpts -> t Redis StreamsRecord
-fromStream key opts = fromStreamStartingFrom key opts newestMessageID
+data RedisStreamReadMode = StreamKeyMode | ConsumerMode | ClaimMode
 
-fromStreamStartingFrom ::
-    IsStream t => StreamKey -> XReadOpts -> MessageID -> t Redis StreamsRecord
-fromStreamStartingFrom key opts = Streamly.unfold (fromStreamUnfold key opts)
+type RedisStreamRead :: RedisStreamReadMode -> Constraint
+class RedisStreamRead mode where
+    type ReadUsing mode :: Type
+    type ReadOptions mode :: Type
+    fromStream :: IsStream t => ReadUsing mode -> ReadOptions mode -> t Redis StreamsRecord
 
-fromStreamUnfold :: StreamKey -> XReadOpts -> Unfold Redis MessageID StreamsRecord
-fromStreamUnfold key opts =
-    Unfold.many
-        (Unfold.unfoldrM readStreamProducer)
-        Unfold.fromList
-  where
-    readStreamProducer lstMsgId =
-        readStream key lstMsgId opts >>= \case
-            Left err -> throwM err -- Possible only when redis sends error message back
-            Right (newMsgId, records) -> pure $ Just (records, newMsgId)
+instance RedisStreamRead StreamKeyMode where
+    type ReadUsing StreamKeyMode = StreamKey
+    type ReadOptions StreamKeyMode = StreamKeyReadOptions
+    fromStream key opts = fromStreamStartingFrom key (xReadOpts opts) (startingMsgID opts)
 
-sendStream ::
+instance RedisStreamRead ConsumerMode where
+    type ReadUsing ConsumerMode = Consumer
+    type ReadOptions ConsumerMode = XReadOpts
+    fromStream = Consumer.fromStreamAsConsumer
+
+instance RedisStreamRead ClaimMode where
+    type ReadUsing ClaimMode = Consumer
+    type ReadOptions ClaimMode = ClaimReadOptions
+    fromStream consumer opts = Consumer.fromPendingMessagesWithDelay consumer (xAutoclaimOpts opts) (delay opts)
+
+streamSink ::
     IsStream t =>
     StreamKey ->
     t Redis Entry ->
     t Redis MessageID
-sendStream streamOut = Streamly.mapM sendStep
+streamSink streamOut = Streamly.mapM sendStep
   where
     sendStep entry =
         sendUpstream streamOut entry >>= \case
