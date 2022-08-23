@@ -77,8 +77,8 @@ readStreamAsConsumer :: Consumer -> XReadOpts -> Redis (Either RedisStreamSomeEr
 readStreamAsConsumer consumer readOpts = do
     res <-
         Redis.xreadGroupOpts @Redis
-            (consumer ^. #name & coerce)
             (consumer ^. #group % #name & coerce)
+            (consumer ^. #name & coerce)
             [(consumer ^. #group % #streamKey & coerce, coerce nextNotDeliveredMessageID)]
             readOpts
     pure $ case res of

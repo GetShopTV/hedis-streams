@@ -6,11 +6,13 @@ maintainer: Diamondy4@hotmail.com
 
 extra-source-files:
   - CHANGELOG.md
+
 dependencies:
   - base >= 4.14 && <= 5
   - hedis
   - bytestring
   - optics-core
+
 default-extensions:
   - OverloadedStrings
   - OverloadedLabels
@@ -26,6 +28,12 @@ default-extensions:
   - NamedFieldPuns
   - RecordWildCards
   - ImportQualifiedPost
+
+ghc-options:
+  - -Wall
+  - -Wincomplete-patterns
+  - -Wno-unticked-promoted-constructors
+
 internal-libraries:
   hedis-streams-core:
     exposed: true
@@ -52,5 +60,16 @@ internal-libraries:
       - hedis-streams-streamly
       - streamly
       - store
-      - winery
       - hashable
+  hedis-streams-streamly-aeson:
+    exposed: true
+    visibility: public
+    source-dirs: lib/hedis-streams-streamly-aeson
+    dependencies:
+      - hedis-streams-core
+      - hedis-streams-streamly
+      - streamly
+      - exceptions
+      - aeson
+      - hashable
+      - text

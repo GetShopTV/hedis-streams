@@ -1,16 +1,24 @@
-module Database.Redis.Streams.ConsumerGroup.Streamly where
+module Database.Redis.Internal.Streams.ConsumerGroup.Streamly where
 
 import Control.Monad.Catch
-import Control.Monad.IO.Class
+import Data.Function
 import Database.Redis
 import Database.Redis.Internal.Instances ()
 import Database.Redis.Streams.ConsumerGroup
 import Database.Redis.Streams.SpecialMessageID (autoclaimNewScanMessageID)
 import Database.Redis.Streams.Types
+import GHC.Generics
 import Streamly.Data.Unfold (Unfold)
 import Streamly.Data.Unfold qualified as Unfold
-import Streamly.Prelude (IsStream)
+import Streamly.Internal.Data.Stream.IsStream qualified as StreamEx
+import Streamly.Prelude (IsStream, SerialT)
 import Streamly.Prelude qualified as Streamly
+
+data ClaimReadOptions = ClaimReadOptions
+    { xAutoclaimOpts :: XAutoclaimOpts
+    , delay :: Double
+    }
+    deriving (Show, Eq, Generic)
 
 fromStreamAsConsumer ::
     IsStream t => Consumer -> XReadOpts -> t Redis StreamsRecord
@@ -26,6 +34,14 @@ fromStreamAsConsumerUnfold consumer opts =
         readStreamAsConsumer consumer opts >>= \case
             Left err -> throwM err -- Possible only when redis sends error message back
             Right records -> pure $ Just (records, ())
+
+-- | Infinity stream of PEL messages with some delay in secs
+fromPendingMessagesWithDelay :: IsStream t => Consumer -> XAutoclaimOpts -> Double -> t Redis StreamsRecord
+fromPendingMessagesWithDelay consumer opts delay =
+    Streamly.repeat @SerialT (fromPendingMessages consumer opts)
+        & StreamEx.delayPost delay
+        & Streamly.concatMap id
+        & Streamly.fromSerial
 
 fromPendingMessages ::
     IsStream t => Consumer -> XAutoclaimOpts -> t Redis StreamsRecord

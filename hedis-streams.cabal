@@ -46,6 +46,7 @@ library hedis-streams-core
       NamedFieldPuns
       RecordWildCards
       ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.14 && <=5
     , bytestring
@@ -59,7 +60,8 @@ library hedis-streams-streamly
   visibility: public
   exposed-modules:
       Database.Redis.Internal.Instances
-      Database.Redis.Streams.ConsumerGroup.Streamly
+      Database.Redis.Internal.Streams.ConsumerGroup.Streamly
+      Database.Redis.Internal.Streams.Streamly
       Database.Redis.Streams.Streamly
   other-modules:
       Paths_hedis_streams
@@ -82,6 +84,7 @@ library hedis-streams-streamly
       NamedFieldPuns
       RecordWildCards
       ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.14 && <=5
     , bytestring
@@ -94,15 +97,53 @@ library hedis-streams-streamly
     , transformers-base
   default-language: Haskell2010
 
+library hedis-streams-streamly-aeson
+  exposed: True
+  visibility: public
+  exposed-modules:
+      Database.Redis.Streams.Aeson.Common
+  other-modules:
+      Paths_hedis_streams
+  autogen-modules:
+      Paths_hedis_streams
+  hs-source-dirs:
+      lib/hedis-streams-streamly-aeson
+  default-extensions:
+      OverloadedStrings
+      OverloadedLabels
+      TypeApplications
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      DeriveGeneric
+      DuplicateRecordFields
+      LambdaCase
+      DeriveAnyClass
+      DerivingStrategies
+      NamedFieldPuns
+      RecordWildCards
+      ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
+  build-depends:
+      aeson
+    , base >=4.14 && <=5
+    , bytestring
+    , exceptions
+    , hashable
+    , hedis
+    , hedis-streams-core
+    , hedis-streams-streamly
+    , optics-core
+    , streamly
+    , text
+  default-language: Haskell2010
+
 library hedis-streams-streamly-store
   exposed: True
   visibility: public
   exposed-modules:
-      Database.Redis.Streams.Common
-      Database.Redis.Streams.ConsumerGroup.Serialize
-      Database.Redis.Streams.ConsumerGroup.Streamly.Serialize
-      Database.Redis.Streams.Stream.Serialize
-      Database.Redis.Streams.Streamly.Serialize
+      Database.Redis.Streams.Store.Common
+      Database.Redis.Streams.Store.Internal
   other-modules:
       Paths_hedis_streams
   autogen-modules:
@@ -124,6 +165,7 @@ library hedis-streams-streamly-store
       NamedFieldPuns
       RecordWildCards
       ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.14 && <=5
     , bytestring
@@ -134,5 +176,4 @@ library hedis-streams-streamly-store
     , optics-core
     , store
     , streamly
-    , winery
   default-language: Haskell2010
