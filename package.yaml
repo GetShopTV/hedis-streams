@@ -72,3 +72,4 @@ internal-libraries:
       - exceptions
       - aeson
       - hashable
+      - text

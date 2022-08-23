@@ -135,6 +135,7 @@ library hedis-streams-streamly-aeson
     , hedis-streams-streamly
     , optics-core
     , streamly
+    , text
   default-language: Haskell2010
 
 library hedis-streams-streamly-store
