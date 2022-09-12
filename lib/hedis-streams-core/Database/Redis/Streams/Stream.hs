@@ -4,20 +4,21 @@ import Control.Monad.Except
 import Control.Monad.State
 import Data.ByteString (ByteString)
 import Data.Coerce
-import Database.Redis (Redis, StreamsRecord (..), XReadOpts)
+import Database.Redis (Redis, StreamsRecord (..), TrimOpts, XReadOpts)
 import Database.Redis qualified as Redis
 import Database.Redis.Streams.SpecialMessageID
 import Database.Redis.Streams.Types
 
 sendUpstream ::
     StreamKey ->
+    TrimOpts ->
     Entry ->
     Redis (Either RedisStreamSomeError ByteString)
-sendUpstream key entries =
+sendUpstream key trimOpts entries =
     runExceptT
         . withExceptT replyToRedisStreamSomeError
         . ExceptT
-        $ Redis.xadd (coerce key) (coerce autogenMessageID) (coerce entries)
+        $ Redis.xaddOpts (coerce key) (coerce autogenMessageID) (coerce entries) trimOpts
 
 {- | Read next message from stream.
 

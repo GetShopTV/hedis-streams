@@ -38,17 +38,19 @@ streamSink ::
     (ToJSON a) =>
     IsStream t =>
     StreamKey ->
+    TrimOpts ->
     t Redis a ->
     t Redis MessageID
-streamSink streamOut source =
+streamSink streamOut trimOpts source =
     source
         & Streamly.map (valueToEntry . toJSON)
-        & SRedis.streamSink streamOut
+        & SRedis.streamSink streamOut trimOpts
 
 sendUpstream ::
     ToJSON a =>
     StreamKey ->
+    TrimOpts ->
     a ->
     Redis (Either RedisStreamSomeError BS.ByteString)
-sendUpstream key =
-    Database.Redis.Streams.Stream.sendUpstream key . valueToEntry . toJSON
+sendUpstream key trimOpts =
+    Database.Redis.Streams.Stream.sendUpstream key trimOpts . valueToEntry . toJSON

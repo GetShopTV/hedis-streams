@@ -45,11 +45,12 @@ instance RedisStreamRead ClaimMode where
 streamSink ::
     IsStream t =>
     StreamKey ->
+    TrimOpts ->
     t Redis Entry ->
     t Redis MessageID
-streamSink streamOut = Streamly.mapM sendStep
+streamSink streamOut trimOpts = Streamly.mapM sendStep
   where
     sendStep entry =
-        sendUpstream streamOut entry >>= \case
+        sendUpstream streamOut trimOpts entry >>= \case
             Left err -> throwM err -- Possible only when redis sends error message back
             Right msgId -> pure $ MessageID msgId

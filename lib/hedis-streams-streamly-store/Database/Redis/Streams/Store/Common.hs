@@ -27,24 +27,26 @@ storePlaceholderStreamEntryField = EntryField "noversion"
 sendUpstream ::
     (Store a) =>
     StreamKey ->
+    TrimOpts ->
     EntryField ->
     a ->
     Redis (Either RedisStreamSomeError ByteString)
-sendUpstream key field =
-    Database.Redis.Streams.Stream.sendUpstream key . toStoreEntry
+sendUpstream key trimOpts field =
+    Database.Redis.Streams.Stream.sendUpstream key trimOpts . toStoreEntry
   where
     toStoreEntry = toStoreEntryWithField field
 
 streamSink ::
     (IsStream t, Store a) =>
     StreamKey ->
+    TrimOpts ->
     EntryField ->
     t Redis a ->
     t Redis MessageID
-streamSink key field inputStream =
+streamSink key trimOpts field inputStream =
     inputStream
         & Streamly.map (toStoreEntryWithField field)
-        & SRedis.streamSink key
+        & SRedis.streamSink key trimOpts
 
 fromStream ::
     forall mode a t.
