@@ -3,13 +3,11 @@
 
 module Database.Redis.Streams.ConsumerGroup where
 
-import Control.Exception
 import Control.Monad.Except
-import Data.ByteString
 import Data.ByteString qualified as BS
 import Data.ByteString.Char8 qualified as BS8
 import Data.Coerce
-import Database.Redis (MonadRedis, Redis, RedisCtx, Reply (..), Status, StreamsRecord, TxResult (..), XReadOpts)
+import Database.Redis (Redis, Reply (..), Status, StreamsRecord, TxResult (..), XReadOpts)
 import Database.Redis qualified as Redis
 import Database.Redis.Streams.Extras qualified as RedisEx
 import Database.Redis.Streams.SpecialMessageID
@@ -28,11 +26,11 @@ getOrCreateConsumerGroup key name = do
     case res of
         Left (Error bs) | "BUSYGROUP" `BS.isInfixOf` bs -> pure $ Right ConsumerGroup{streamKey = key, name = name}
         Left err -> pure $ Left $ replyToRedisStreamSomeError err
-        Right sta -> pure $ Right ConsumerGroup{streamKey = key, name = name}
+        Right _sta -> pure $ Right ConsumerGroup{streamKey = key, name = name}
 
 deleteConsumer :: Consumer -> Redis (Either RedisStreamSomeError ())
 deleteConsumer consumer = runExceptT . withExceptT replyToRedisStreamSomeError $ do
-    ExceptT $
+    void . ExceptT $
         Redis.xgroupDelConsumer
             (consumer ^. #group % #streamKey & coerce)
             (consumer ^. #group % #name & coerce)
@@ -50,12 +48,12 @@ consumeMessages :: ConsumerGroup -> [MessageID] -> Redis (Either RedisStreamSome
 consumeMessages group messages = do
     let key = coerce $ group ^. #streamKey
     res <- Redis.multiExec $ do
-        Redis.xack key (group ^. #name & coerce) (coerce messages)
+        void $ Redis.xack key (group ^. #name & coerce) (coerce messages)
         Redis.xdel key (coerce messages)
     pure $ case res of
         TxSuccess _ -> Right ()
         err@TxAborted -> Left . RedisStreamError . BS8.pack $ show err
-        err@(TxError s) -> Left . RedisStreamError . BS8.pack $ show err
+        err@(TxError _) -> Left . RedisStreamError . BS8.pack $ show err
 
 {- | Consume messages from stream by 'Redis.xack'.
 
@@ -67,8 +65,7 @@ consumeMessages group messages = do
 ackMessages :: ConsumerGroup -> [MessageID] -> Redis (Either RedisStreamSomeError ())
 ackMessages group messages = runExceptT . withExceptT replyToRedisStreamSomeError $ do
     let key = coerce $ group ^. #streamKey
-    ExceptT $ Redis.xack key (group ^. #name & coerce) (coerce messages)
-    return ()
+    void $ ExceptT $ Redis.xack key (group ^. #name & coerce) (coerce messages)
 
 {- | Read next messages as consumer in consumer group.
  Producer for your favorite streaming library.

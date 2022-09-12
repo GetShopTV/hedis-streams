@@ -3,13 +3,11 @@ module Database.Redis.Streams.Stream where
 import Control.Monad.Except
 import Control.Monad.State
 import Data.ByteString (ByteString)
-import Data.ByteString.Char8 qualified as Ch8
 import Data.Coerce
-import Database.Redis (Redis, Reply, StreamsRecord (..), XReadOpts)
+import Database.Redis (Redis, StreamsRecord (..), XReadOpts)
 import Database.Redis qualified as Redis
 import Database.Redis.Streams.SpecialMessageID
 import Database.Redis.Streams.Types
-import Database.Redis.Streams.Types.Error
 
 sendUpstream ::
     StreamKey ->

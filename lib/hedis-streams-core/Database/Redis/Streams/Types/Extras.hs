@@ -2,7 +2,6 @@ module Database.Redis.Streams.Types.Extras where
 
 import Data.ByteString
 import Database.Redis
-import Database.Redis qualified as Redis
 
 data XAutoclaimResponse = XAutoclaimResponse
     { nextStreamId :: ByteString

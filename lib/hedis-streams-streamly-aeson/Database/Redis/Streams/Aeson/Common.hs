@@ -16,7 +16,7 @@ import Database.Redis.Streams.Types.Stream
 import Streamly.Prelude (IsStream)
 import Streamly.Prelude qualified as Streamly
 
-data NonObjectJSONException = NonObjectJSONException String
+newtype NonObjectJSONException = NonObjectJSONException String
     deriving (Show, Eq)
     deriving anyclass (Exception)
 

@@ -1,9 +1,7 @@
 module Database.Redis.Streams.Extras where
 
-import Data.ByteString hiding (concat)
-import Data.ByteString qualified as BS hiding (concat)
+import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS8
-import Data.Maybe
 import Database.Redis
 import Database.Redis qualified as Redis
 import Database.Redis.Streams.Types.Extras
