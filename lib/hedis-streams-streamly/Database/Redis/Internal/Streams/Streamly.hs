@@ -1,5 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Database.Redis.Internal.Streams.Streamly where
@@ -10,9 +9,8 @@ import Database.Redis.Internal.Instances ()
 import Database.Redis.Streams.Stream
 import Database.Redis.Streams.Types
 
-import Control.Monad.Catch
-
 import GHC.Generics
+
 import Streamly.Data.Unfold (Unfold)
 import Streamly.Data.Unfold qualified as Unfold
 import Streamly.Prelude (IsStream)
@@ -36,5 +34,5 @@ fromStreamUnfold key opts =
   where
     readStreamProducer lstMsgId =
         readStream key lstMsgId opts >>= \case
-            Left err -> throwM err -- Possible only when redis sends error message back
+            Left _err -> readStreamProducer lstMsgId -- Possible only when redis sends error message back
             Right (newMsgId, records) -> pure $ Just (records, newMsgId)

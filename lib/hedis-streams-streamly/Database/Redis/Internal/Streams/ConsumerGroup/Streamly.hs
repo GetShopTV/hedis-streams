@@ -1,6 +1,5 @@
 module Database.Redis.Internal.Streams.ConsumerGroup.Streamly where
 
-import Control.Monad.Catch
 import Data.Function
 import Database.Redis
 import Database.Redis.Internal.Instances ()
@@ -32,7 +31,7 @@ fromStreamAsConsumerUnfold consumer opts =
   where
     readStreamAsConsumerProducer =
         readStreamAsConsumer consumer opts >>= \case
-            Left err -> throwM err -- Possible only when redis sends error message back
+            Left _err -> readStreamAsConsumerProducer -- Possible only when redis sends error message back
             Right records -> pure $ Just (records, ())
 
 -- | Infinity stream of PEL messages with some delay in secs
@@ -59,7 +58,7 @@ fromPendingMessagesUnfold consumer autoclaimOpts =
         Unfold.fromList
   where
     readPendingMessagesProdcer Nothing = pure Nothing
-    readPendingMessagesProdcer (Just lstMsgId) =
+    readPendingMessagesProdcer lstMsg@(Just lstMsgId) =
         readPendingMessages consumer lstMsgId autoclaimOpts >>= \case
-            Left err -> throwM err -- Possible only when redis sends error message back
+            Left _err -> readPendingMessagesProdcer lstMsg -- Possible only when redis sends error message back
             Right (newMsgId, records) -> pure $ Just (records, newMsgId)
