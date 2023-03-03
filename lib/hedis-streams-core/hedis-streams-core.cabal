@@ -1,0 +1,50 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           hedis-streams-core
+version:        0.2.0.0
+author:         Diamondy4
+maintainer:     Diamondy4@hotmail.com
+build-type:     Simple
+
+library
+  exposed-modules:
+      Database.Redis.Streams.ConsumerGroup
+      Database.Redis.Streams.Extras
+      Database.Redis.Streams.SpecialMessageID
+      Database.Redis.Streams.Stream
+      Database.Redis.Streams.Types
+      Database.Redis.Streams.Types.ConsumerGroup
+      Database.Redis.Streams.Types.Error
+      Database.Redis.Streams.Types.Extras
+      Database.Redis.Streams.Types.Stream
+  other-modules:
+      Paths_hedis_streams_core
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      OverloadedLabels
+      TypeApplications
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      DeriveGeneric
+      DuplicateRecordFields
+      LambdaCase
+      DeriveAnyClass
+      DerivingStrategies
+      NamedFieldPuns
+      RecordWildCards
+      ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
+  build-depends:
+      base >=4.14 && <=5
+    , bytestring
+    , hedis
+    , mtl
+    , optics-core
+  default-language: Haskell2010

@@ -1,0 +1,49 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           hedis-streams-streamly
+version:        0.2.0.0
+author:         Diamondy4
+maintainer:     Diamondy4@hotmail.com
+build-type:     Simple
+
+library
+  exposed-modules:
+      Database.Redis.Internal.Instances
+      Database.Redis.Internal.Streams.ConsumerGroup.Streamly
+      Database.Redis.Internal.Streams.Streamly
+      Database.Redis.Streams.Streamly
+  other-modules:
+      Paths_hedis_streams_streamly
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      OverloadedLabels
+      TypeApplications
+      DataKinds
+      FlexibleContexts
+      FlexibleInstances
+      DeriveGeneric
+      DuplicateRecordFields
+      LambdaCase
+      DeriveAnyClass
+      DerivingStrategies
+      NamedFieldPuns
+      RecordWildCards
+      ImportQualifiedPost
+  ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
+  build-depends:
+      base >=4.14 && <=5
+    , bytestring
+    , exceptions
+    , hedis
+    , hedis-streams-core
+    , monad-control
+    , optics-core
+    , streamly
+    , transformers-base
+  default-language: Haskell2010

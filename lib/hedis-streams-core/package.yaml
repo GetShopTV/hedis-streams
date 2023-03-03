@@ -1,0 +1,37 @@
+name: hedis-streams-core
+version: "0.2.0.0"
+author: Diamondy4
+maintainer: Diamondy4@hotmail.com
+#license: UnspecifiedLicense
+
+dependencies:
+  - base >= 4.14 && <= 5
+  - hedis
+  - bytestring
+  - optics-core
+
+default-extensions:
+  - OverloadedStrings
+  - OverloadedLabels
+  - TypeApplications
+  - DataKinds
+  - FlexibleContexts
+  - FlexibleInstances
+  - DeriveGeneric
+  - DuplicateRecordFields
+  - LambdaCase
+  - DeriveAnyClass
+  - DerivingStrategies
+  - NamedFieldPuns
+  - RecordWildCards
+  - ImportQualifiedPost
+
+ghc-options:
+  - -Wall
+  - -Wincomplete-patterns
+  - -Wno-unticked-promoted-constructors
+
+library:
+  source-dirs: src
+  dependencies:
+    - mtl
