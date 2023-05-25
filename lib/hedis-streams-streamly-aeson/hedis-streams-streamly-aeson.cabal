@@ -34,13 +34,15 @@ library
       ImportQualifiedPost
   ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
   build-depends:
-      base >=4.14 && <=5
+      aeson
+    , base >=4.14 && <=5
     , bytestring
+    , exceptions
     , hashable
     , hedis
     , hedis-streams-core
     , hedis-streams-streamly
     , optics-core
-    , store
     , streamly
+    , text
   default-language: Haskell2010

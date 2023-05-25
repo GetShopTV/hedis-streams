@@ -14,15 +14,7 @@
         inputs.haskell-flake.flakeModule
       ];
       perSystem = { self', config, inputs', pkgs, lib, ... }: {
-        haskellProjects.default = {
-          basePackages = pkgs.haskell.packages.ghc926;
-          packages = {
-            hedis-streams-core.root = ./lib/hedis-streams-core/.;
-            hedis-streams-streamly.root = ./lib/hedis-streams-streamly/.;
-            hedis-streams-streamly-aeson.root = ./lib/hedis-streams-streamly-aeson/.;
-            hedis-streams-streamly-store.root = ./lib/hedis-streams-streamly-store/.;
-          };
-        };
+        haskellProjects.default = { };
         packages.default = config.packages.hedis-streams-core;
       };
     };

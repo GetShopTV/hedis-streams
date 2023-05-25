@@ -3,7 +3,7 @@ module Database.Redis.Streams.Aeson.Common where
 import Control.Exception
 import Data.Aeson
 import Data.Aeson qualified as Aeson
-import Data.Aeson.Key qualified as AesiKey
+import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString qualified as BS
 import Data.Function
@@ -26,7 +26,7 @@ valueToEntry (Object km) =
   where
     convert (field, value) = (entryF, entryV)
       where
-        entryF = EntryField . TE.encodeUtf8 . AesiKey.toText $ field
+        entryF = EntryField . TE.encodeUtf8 . AesonKey.toText $ field
         entryV = EntryValue $ case value of
             Aeson.String s -> TE.encodeUtf8 s
             val -> BS.toStrict . encode $ val

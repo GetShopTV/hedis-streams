@@ -37,5 +37,7 @@ library:
     - hedis-streams-core
     - hedis-streams-streamly
     - streamly
-    - store
+    - exceptions
+    - aeson
     - hashable
+    - text

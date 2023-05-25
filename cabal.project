@@ -1,0 +1,5 @@
+packages:
+    ./lib/hedis-streams-core/
+    ./lib/hedis-streams-streamly/
+    ./lib/hedis-streams-streamly-aeson/
+    ./lib/hedis-streams-streamly-store/
