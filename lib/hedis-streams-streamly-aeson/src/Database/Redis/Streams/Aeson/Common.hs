@@ -13,8 +13,7 @@ import Database.Redis.Streams.Stream qualified
 import Database.Redis.Streams.Streamly qualified as SRedis
 import Database.Redis.Streams.Types.Error
 import Database.Redis.Streams.Types.Stream
-import Streamly.Prelude (IsStream)
-import Streamly.Prelude qualified as Streamly
+import Streamly.Data.Stream.Prelude (Stream)
 
 newtype NonObjectJSONException = NonObjectJSONException String
     deriving (Show, Eq)
@@ -36,18 +35,17 @@ valueToEntry val = throw $ NonObjectJSONException $ show val
 
 streamSink ::
     (ToJSON a) =>
-    IsStream t =>
     StreamKey ->
     TrimOpts ->
-    t Redis a ->
-    t Redis MessageID
+    Stream Redis a ->
+    Stream Redis MessageID
 streamSink streamOut trimOpts source =
     source
-        & Streamly.map (valueToEntry . toJSON)
+        & fmap (valueToEntry . toJSON)
         & SRedis.streamSink streamOut trimOpts
 
 sendUpstream ::
-    ToJSON a =>
+    (ToJSON a) =>
     StreamKey ->
     TrimOpts ->
     a ->

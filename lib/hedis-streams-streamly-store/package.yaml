@@ -25,6 +25,9 @@ default-extensions:
   - NamedFieldPuns
   - RecordWildCards
   - ImportQualifiedPost
+  - OverloadedRecordDot
+
+language: GHC2021
 
 ghc-options:
   - -Wall
@@ -37,5 +40,6 @@ library:
     - hedis-streams-core
     - hedis-streams-streamly
     - streamly
+    - streamly-core
     - store
     - hashable

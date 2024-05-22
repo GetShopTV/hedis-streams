@@ -25,6 +25,9 @@ default-extensions:
   - NamedFieldPuns
   - RecordWildCards
   - ImportQualifiedPost
+  - OverloadedRecordDot
+
+language: GHC2021
 
 ghc-options:
   - -Wall

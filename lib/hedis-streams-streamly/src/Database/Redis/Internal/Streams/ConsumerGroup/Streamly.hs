@@ -7,11 +7,10 @@ import Database.Redis.Streams.ConsumerGroup
 import Database.Redis.Streams.SpecialMessageID (autoclaimNewScanMessageID)
 import Database.Redis.Streams.Types
 import GHC.Generics
+import Streamly.Data.Stream.Prelude as Stream
 import Streamly.Data.Unfold (Unfold)
 import Streamly.Data.Unfold qualified as Unfold
-import Streamly.Internal.Data.Stream.IsStream qualified as StreamEx
-import Streamly.Prelude (IsStream, SerialT)
-import Streamly.Prelude qualified as Streamly
+import Streamly.Internal.Data.Stream as StreamEx
 
 data ClaimReadOptions = ClaimReadOptions
     { xAutoclaimOpts :: XAutoclaimOpts
@@ -19,15 +18,14 @@ data ClaimReadOptions = ClaimReadOptions
     }
     deriving (Show, Eq, Generic)
 
-fromStreamAsConsumer ::
-    IsStream t => Consumer -> XReadOpts -> t Redis StreamsRecord
-fromStreamAsConsumer consumer opts = Streamly.unfold (fromStreamAsConsumerUnfold consumer opts) ()
+fromStreamAsConsumer :: Consumer -> XReadOpts -> Stream Redis StreamsRecord
+fromStreamAsConsumer consumer opts = Stream.unfold (fromStreamAsConsumerUnfold consumer opts) mempty
 
 fromStreamAsConsumerUnfold :: Consumer -> XReadOpts -> Unfold Redis () StreamsRecord
 fromStreamAsConsumerUnfold consumer opts =
     Unfold.many
-        (Unfold.unfoldrM (const readStreamAsConsumerProducer))
         Unfold.fromList
+        (Unfold.unfoldrM (const readStreamAsConsumerProducer))
   where
     readStreamAsConsumerProducer =
         readStreamAsConsumer consumer opts >>= \case
@@ -35,27 +33,26 @@ fromStreamAsConsumerUnfold consumer opts =
             Right records -> pure $ Just (records, ())
 
 -- | Infinity stream of PEL messages with some delay in secs
-fromPendingMessagesWithDelay :: IsStream t => Consumer -> XAutoclaimOpts -> Double -> t Redis StreamsRecord
-fromPendingMessagesWithDelay consumer opts delay =
-    Streamly.repeat @SerialT (fromPendingMessages consumer opts)
-        & StreamEx.delayPost delay
-        & Streamly.concatMap id
-        & Streamly.fromSerial
+fromPendingMessagesWithDelay :: Consumer -> XAutoclaimOpts -> Double -> Stream Redis StreamsRecord
+fromPendingMessagesWithDelay consumer opts delay' =
+    Stream.repeat (fromPendingMessages consumer opts)
+        & StreamEx.delayPost delay'
+        & Stream.concatMap id
 
 fromPendingMessages ::
-    IsStream t => Consumer -> XAutoclaimOpts -> t Redis StreamsRecord
+    Consumer -> XAutoclaimOpts -> Stream Redis StreamsRecord
 fromPendingMessages consumer = fromPendingMessagesStartingFrom consumer autoclaimNewScanMessageID
 
 fromPendingMessagesStartingFrom ::
-    IsStream t => Consumer -> MessageID -> XAutoclaimOpts -> t Redis StreamsRecord
+    Consumer -> MessageID -> XAutoclaimOpts -> Stream Redis StreamsRecord
 fromPendingMessagesStartingFrom consumer lstMsgId opts =
-    Streamly.unfold (fromPendingMessagesUnfold consumer opts) (Just lstMsgId)
+    Stream.unfold (fromPendingMessagesUnfold consumer opts) (Just lstMsgId)
 
 fromPendingMessagesUnfold :: Consumer -> XAutoclaimOpts -> Unfold Redis (Maybe MessageID) StreamsRecord
 fromPendingMessagesUnfold consumer autoclaimOpts =
     Unfold.many
-        (Unfold.unfoldrM readPendingMessagesProdcer)
         Unfold.fromList
+        (Unfold.unfoldrM readPendingMessagesProdcer)
   where
     readPendingMessagesProdcer Nothing = pure Nothing
     readPendingMessagesProdcer lstMsg@(Just lstMsgId) =

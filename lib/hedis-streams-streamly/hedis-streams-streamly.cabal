@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -35,6 +35,7 @@ library
       NamedFieldPuns
       RecordWildCards
       ImportQualifiedPost
+      OverloadedRecordDot
   ghc-options: -Wall -Wincomplete-patterns -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.14 && <=5
@@ -45,5 +46,6 @@ library
     , monad-control
     , optics-core
     , streamly
+    , streamly-core
     , transformers-base
-  default-language: Haskell2010
+  default-language: GHC2021

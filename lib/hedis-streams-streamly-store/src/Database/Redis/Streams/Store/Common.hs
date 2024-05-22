@@ -13,9 +13,8 @@ import Database.Redis.Streams.Stream
 import Database.Redis.Streams.Streamly (RedisStreamRead (..))
 import Database.Redis.Streams.Streamly qualified as SRedis
 import Database.Redis.Streams.Types
+import Streamly.Data.Stream.Prelude as Stream
 import Streamly.Data.Unfold qualified as Unfold
-import Streamly.Prelude (IsStream)
-import Streamly.Prelude qualified as Streamly
 
 {- | Placeholder entry field to store serialized data.
  If possible use your type version as key.
@@ -37,23 +36,23 @@ sendUpstream key trimOpts field =
     toStoreEntry = toStoreEntryWithField field
 
 streamSink ::
-    (IsStream t, Store a) =>
+    (Store a) =>
     StreamKey ->
     TrimOpts ->
     EntryField ->
-    t Redis a ->
-    t Redis MessageID
+    Stream Redis a ->
+    Stream Redis MessageID
 streamSink key trimOpts field inputStream =
     inputStream
-        & Streamly.map (toStoreEntryWithField field)
+        & fmap (toStoreEntryWithField field)
         & SRedis.streamSink key trimOpts
 
 fromStream ::
-    forall mode a t.
-    (RedisStreamRead mode, IsStream t, Store a) =>
+    forall mode a.
+    (RedisStreamRead mode, Store a) =>
     ReadUsing mode ->
     ReadOptions mode ->
-    t Redis (MessageID, EntryField, Either PeekException a)
+    Stream Redis (MessageID, EntryField, Either PeekException a)
 fromStream using opts =
     SRedis.fromStream @mode using opts
-        & Streamly.unfoldMany deserializedStreamsRecordUnfold
+        & Stream.unfoldMany deserializedStreamsRecordUnfold
