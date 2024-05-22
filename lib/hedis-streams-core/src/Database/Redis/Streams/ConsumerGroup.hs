@@ -3,6 +3,7 @@
 
 module Database.Redis.Streams.ConsumerGroup where
 
+import Control.Monad
 import Control.Monad.Except
 import Data.ByteString qualified as BS
 import Data.ByteString.Char8 qualified as BS8
